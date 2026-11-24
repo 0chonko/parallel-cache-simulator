@@ -15,7 +15,13 @@ A trace-driven L1 data cache and coherence simulator written in C++ and SystemC.
 
 The baseline cache is 32 KiB, with 32-byte lines and eight ways. Its 1,024 lines form 128 sets, so the address uses five offset bits and seven set-index bits. The multicore models also have 64, 128, and 512 KiB build targets.
 
+![Cache address split into tag, set index, and byte offset](docs/diagrams/address-decoding.svg)
+
 The shared bus uses a FIFO queue to arbitrate requests. Under V-I, stores go to memory and invalidate matching copies in peer caches. MOESI lets a cache supply dirty data directly to another core. For example, a read of a Modified line can move the original copy to Owned and give the requester a Shared copy. A local write to an Exclusive line moves it to Modified without a bus transaction.
+
+![Shared-bus request sequence between CPU, cache, peer caches, and memory](docs/diagrams/bus-coherence-sequence.svg)
+
+![Cache-line state transitions for V-I and MOESI](docs/diagrams/vi-vs-moesi.svg)
 
 ## Build and run
 
@@ -40,3 +46,5 @@ Set `SYSTEMC_LIBDIR` to the directory containing the SystemC library. The exampl
 - **Single-core cache.** The portfolio reports a 96.42% hit rate for a 50×50 matrix workload and 97.91% for FFT at 32 KiB. The 8×5000 workload fell from 96.77% at 32 KiB to 88.86% at 128 KiB, then recovered to 97.73% at 512 KiB. The article attributes the dip to conflict misses from set indexing.
 - **Multicore coherence.** MOESI sustained hit rates above 80% in the reported comparisons and reduced memory accesses through cache-to-cache transfers. Average bus acquisition time improved slightly.
 - **OpenMP heat diffusion.** The case study compared a baseline, direct array access, 16×16 and 8×8 tiling, and cache-aligned static scheduling. The 16×16 variant nearly halved cache requests and reduced runtime. The 8×8 variant gave diminishing returns, and cache-aligned scheduling modestly reduced invalidations.
+
+![Row sweeps, tiled traversal, and cache-aligned OpenMP chunks](docs/diagrams/heat-access-patterns.svg)
