@@ -4,6 +4,8 @@ A trace-driven L1 data cache and coherence simulator written in C++ and SystemC.
 
 [Simulating a Cache with SystemC](https://0chonko.github.io/blog/simulating-a-cache-with-systemc/) covers the design, diagrams, and benchmark results.
 
+The Parallel System Architectures course framework in [`lib/`](lib/) supplies trace reading and statistics. Its authors are Michiel W. van Tol, Mike Lankamp, and Simon Polstra. I implemented the cache and coherence logic and analyzed the OpenMP heat-diffusion workloads.
+
 ## Simulator stages
 
 | Target | Model |
@@ -25,16 +27,16 @@ The shared bus uses a FIFO queue to arbitrate requests. Under V-I, stores go to 
 
 ## Build and run
 
-With GNU Make, a C++14-capable compiler, and a compatible SystemC installation, run from the repository root:
+With GNU Make, a C++14-capable compiler, and a compatible SystemC installation (verified with SystemC 2.3.4), run from the repository root:
 
 ```sh
 make targets
-make -B assignment_2 assignment_3 SYSTEMC_PATH=/path/to/systemc SYSTEMC_LIBDIR=/path/to/systemc/lib
+make assignment_2 assignment_3 SYSTEMC_PATH=/path/to/systemc SYSTEMC_LIBDIR=/path/to/systemc/lib
 ./assignment_2.bin tracefiles/matrix_mult_50_50_p4.trf
 ./assignment_3.bin tracefiles/matrix_mult_50_50_p4.trf
 ```
 
-Set `SYSTEMC_LIBDIR` to the directory containing the SystemC library. The example forces a rebuild because the repository includes prebuilt binaries. The trace determines the simulated core count. The bundled matrix traces include 1-, 2-, 4-, and 8-core variants.
+Set `SYSTEMC_PATH` to the installation prefix and `SYSTEMC_LIBDIR` to the directory containing the library. Build SystemC with the same C++ standard as the simulator (C++14). The trace determines the simulated core count. The bundled matrix traces include 1-, 2-, 4-, and 8-core variants.
 
 - [`src/`](src/) contains the simulator implementations.
 - [`lib/`](lib/) contains the shared trace reader and statistics code.

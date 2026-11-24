@@ -3,29 +3,12 @@
 # Author(s): Michiel W. van Tol, Simon Polstra
 # Note: This Makefile requires GNU Make 3.81 or newer
 
-# Location of the SystemC library files
-# CHANGE THIS TO MATCH YOUR INSTALLATION
-SYSTEMC_PATH    = /Users/germanfak/local/systemc
+# Override these settings for your SystemC installation.
+SYSTEMC_PATH ?= /usr/local
+SYSTEMC_LIBDIR ?= $(firstword $(wildcard $(SYSTEMC_PATH)/lib-$(if $(filter x86_64,$(shell uname -m)),linux64,linux) $(SYSTEMC_PATH)/lib64 $(SYSTEMC_PATH)/lib) $(SYSTEMC_PATH)/lib)
 
 
 SYSTEMC_INCLUDE = $(SYSTEMC_PATH)/include
-
-# Figure out on what processor/architecture we compile
-MACHINE_ARCH = $(shell uname -m)
-KERNEL = $(shell uname -s)
-
-# Then pick the right path for the precompiled SystemC Library
-ifeq ($(KERNEL),Darwin)
-	ifeq ($(MACHINE_ARCH), x86_64)
-		SYSTEMC_LIBDIR     = $(SYSTEMC_PATH)/lib
-	else ifeq ($(MACHINE_ARCH), arm64)
-		SYSTEMC_LIBDIR     = $(SYSTEMC_PATH)/lib
-	endif
-else ifeq ($(MACHINE_ARCH),i686)
-    SYSTEMC_LIBDIR     = $(SYSTEMC_PATH)/lib-linux
-else ifeq ($(MACHINE_ARCH),x86_64)
-    SYSTEMC_LIBDIR     = $(SYSTEMC_PATH)/lib-linux64
-endif
 
 # Path settings
 SOURCE_PATH     = src
@@ -40,7 +23,7 @@ CC              = g++
 CFLAGS          = -Wall -O2 -std=c++14
 INCLUDES        = -I $(SYSTEMC_INCLUDE) -I $(FRAMEWORK_LIB_DIR)
 LIBS            = -lsystemc -pthread
-LIBDIR          = -L$(SYSTEMC_LIBDIR)
+LIBDIR          = -L$(SYSTEMC_LIBDIR) -Wl,-rpath,$(SYSTEMC_LIBDIR)
 
 # debug configuration
 #CFLAGS          = -Wall -g3 -O0 -std=c++14 -fsanitize=address
@@ -64,7 +47,7 @@ all: $(TARGETS)
 	
 $(TARGETS): $$@.bin
 
-%.bin: $(D_CPP_FILES) $(D_H_FILES) $(SYSTEMC_LIB)
+%.bin: $(D_CPP_FILES) $(D_H_FILES) $(FRAMEWORK_LIB) $(FRAMEWORK_LIB_DIR)psa.h Makefile
 	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $(CPP_FILES) $(FRAMEWORK_LIB) $(LIBDIR) $(LIBS)
 	
 targets:
